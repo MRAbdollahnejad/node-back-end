@@ -53,7 +53,8 @@ const UserSchema = new Schema(
 		refreshToken: {
 			type: String,
 			select: false
-		}
+		},
+		wishlist: [{ type: Schema.Types.ObjectId, ref: 'Product' }]
 	},
 	{
 		timestamps: true

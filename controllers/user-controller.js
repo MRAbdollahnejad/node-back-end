@@ -1,6 +1,8 @@
 const { AppError } = require('../utils/app-error');
 
 const User = require('../models/user-model');
+const Product = require('../models/product-model');
+
 const { ApiFeatures } = require('../utils/api-features');
 
 //** Controllers
@@ -150,10 +152,69 @@ const removeUserById = async (req, res, next) => {
 	});
 };
 
+const addToWishlist = async (req, res) => {  
+	try {  
+		const userId = req.body.userId;
+		
+		const productId = req.params.productId; // Product ID from request parameters  
+
+		const user = await User.findById(userId);  
+		if (!user) {  
+			return res.status(404).json({ message: 'User not found' });  
+		}  
+
+		if (!user.wishlist.includes(productId)) {  
+			user.wishlist.push(productId);  
+			await user.save();  
+		}  
+
+		res.status(200).json({ message: 'Product added to wishlist', wishlist: user.wishlist });  
+	} catch (error) {  
+		res.status(500).json({ message: 'Server error', error });  
+	}  
+};  
+
+// Remove product from wishlist  
+const removeFromWishlist = async (req, res) => {  
+	try {  
+		const userId = req.body.userId; 
+		const productId = req.params.productId;  
+
+		const user = await User.findById(userId);  
+		if (!user) {  
+			return res.status(404).json({ message: 'User not found' });  
+		}  
+
+		user.wishlist = user.wishlist.filter(id => id.toString() !== productId);  
+		await user.save();  
+
+		res.status(200).json({ message: 'Product removed from wishlist', wishlist: user.wishlist });  
+	} catch (error) {  
+		res.status(500).json({ message: 'Server error', error });  
+	}  
+};  
+
+// Get user's wishlist  
+const getWishlist = async (req, res) => {  
+	try {  
+		const userId = req.body.userId;  
+		const user = await User.findById(userId); 
+		if (!user) {  
+			return res.status(404).json({ message: 'User not found' });  
+		}  
+		res.status(200).json({ wishlist: user.wishlist });  
+	} catch (error) {  
+		res.status(500).json({ message: 'Server error', error });  
+	}  
+}; 
+
 module.exports = {
 	addUser,
 	getAllUsers,
 	getUserById,
 	editUserById,
-	removeUserById
+	removeUserById,
+	addToWishlist,
+	removeFromWishlist,
+	getWishlist
 };
